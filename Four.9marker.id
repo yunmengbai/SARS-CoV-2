@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+use strict;
+
+my %hash;my @arr;
+my %pos;my @pos;
+my %code;
+
+my %hap;
+$hap{"TTCTCACGT"}="H1";
+$hap{"CCCCCACAT"}="H2";
+$hap{"CCTCTGTAC"}="H3";
+$hap{"CCTCCACAC"}="H4";
+$hap{"TTCCCACGT"}="H5";
+$hap{"CCTCCGTAC"}="H6";
+$hap{"CTCTCACGT"}="H7";
+$hap{"TCCTCACGT"}="H8";
+
+
+open IN,"9sites.all.snp.vcf";
+while(<IN>){
+        chomp;
+	my @list=split /\t/;
+        if ($list[0]=~/CHROM/){
+		my $j=0;
+		foreach my $i (@list){
+			if ($i=~/.fasta.bam/){
+				my $id=$i; $id=~s/.fasta.bam//;
+				$hash{$j}=$id;
+				push(@arr,$j);
+			}
+			$j++;	
+		}
+	
+	}
+	else{
+		$pos{$list[1]}=$list[3];
+        	push (@pos,$list[1]);
+		my @a; push(@a,$list[3]);
+		foreach my $alt (split /\,/,$list[4]){
+			push(@a,$alt);
+		}
+
+		foreach my $i (@arr){
+			my $x=(split /\//,$list[$i])[0];
+			my $code=$a[$x];
+			$code{$i}.=$code;
+		}
+	}
+}
+close IN;
+
+foreach my $key (@arr){
+	my $k=$code{$key};
+	my $hap="other"; $hap=$hap{$k} if exists $hap{$k};
+	print "$key\t$hash{$key}\t$code{$key}\t$hap\n";
+}
+
