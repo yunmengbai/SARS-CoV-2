@@ -1,0 +1,39 @@
+#!/usr/bin/perl -w
+use strict;
+
+my %hash; my @arr;
+open IN,"keys.single.txt";
+while(<IN>){
+	chomp;
+	my @list=split /\t/;
+	$hash{$list[1]}=$list[2];
+	push (@arr,$list[1]);
+}	
+close IN;
+
+
+open IN,$ARGV[0];
+<IN>;
+while(<IN>){
+	chomp;
+	my @list=split /\t/;
+	shift @list;
+	my $pos=shift @list;
+	shift @list;shift @list;
+	foreach my $i (@list){
+		my @a=split /\:/,$i;
+		my $key="$pos"."$a[0]";
+		my $fq=$a[1];
+		if (exists $hash{$key}){
+			$hash{$key}=$fq;
+		}
+	}
+}
+close IN;
+
+my @x=split /\./,$ARGV[0];
+print "$x[1]\t$x[2]\t$x[3]";
+foreach my $key (@arr){
+	print "\t$hash{$key}";
+}
+print "\n";
