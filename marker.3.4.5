@@ -1,0 +1,140 @@
+#!/usr/bin/perl -w
+use strict;
+
+my %pos;my @pos;
+open IN,"9sites.5.Canada.130.vcf";
+<IN>;
+while(<IN>){
+	chomp;
+	my @list=split /\t/;
+	$pos{$list[1]}=$list[3];
+	push (@pos,$list[1]);
+}
+close IN;
+
+my $count=0;
+my %hash;
+open IN,$ARGV[0];
+while(<IN>){
+	chomp;
+	next if $_=~/^#/;
+	my @list=split /\t/;
+	shift @list;
+	my $pos=shift @list;
+	shift @list;
+	my @a; push (@a,shift @list);
+	my $alt=shift @list;
+	foreach my $a (split /\,/,$alt){
+		push (@a,$a);
+	}
+	shift @list;
+	shift @list;
+	shift @list;
+	my $test=shift @list;
+
+	if (exists $pos{$pos}){
+		my $value;my $j=0;
+		foreach my $i (@list){
+			my $x=(split /\//,$i)[0];
+			my $nc=$a[$x];
+			$value.=$nc;
+			$j++;
+		}
+		$hash{$pos}=$value;
+		$count=$j;
+	}
+	
+}
+close IN;
+
+foreach my $key (@pos){
+	if (exists $hash{$key}){
+		#my $len=length $hash{$key};
+		#print "1\t$key\t$len\t$hash{$key}\n";
+		next;
+	}
+	else{
+		my $value;
+		foreach my $i (1..$count){
+			$value.=$pos{$key};
+		}
+		my $len=length $value;
+		#print "2\t$key\t$len\t$value\n";
+		$hash{$key}=$value;
+	}
+}
+#print "Country\tCAC\tTGT\tCCCA\tTTTG\tTTCTCACGT\tCCCCCACAT\tCCTCTGTAC\tCCTCCACAC\n";
+my $country=(split /\./,$ARGV[0])[2];
+#print "$country\t";
+
+
+my @line3;
+my @mark3=(17747,17858,18060);
+foreach my $key (@mark3){
+	push (@line3,$hash{$key});
+}
+my @a1=split //,$line3[0];
+my @a2=split //,$line3[1];
+my @a3=split //,$line3[2];
+my $a1=0; my $a2=0;
+foreach my $i (0..$count-1){
+	my $code=$a1[$i].$a2[$i].$a3[$i];
+	$a1++ if $code=~/CAC/;
+	$a2++ if $code=~/TGT/;
+}
+my $a3=$a1/$count;$a3=sprintf("%.4f",$a3);
+my $a4=$a2/$count;$a4=sprintf("%.4f",$a4);
+#print "$a3\t$a4\t";
+
+my @line4;
+my @mark4=(241,3037,14408,23403);
+foreach my $key (@mark4){
+	push (@line4,$hash{$key});
+}
+my @b1=split //,$line4[0];
+my @b2=split //,$line4[1];
+my @b3=split //,$line4[2];
+my @b4=split //,$line4[3];
+my $b1=0;my $b2=0;
+foreach my $i (0..$count-1){
+	my $code=$b1[$i].$b2[$i].$b3[$i].$b4[$i];
+	$b1++ if $code=~/CCCA/;
+	$b2++ if $code=~/TTTG/;
+}
+my $b3=$b1/$count;$b3=sprintf("%.4f",$b3);
+my $b4=$b2/$count;$b4=sprintf("%.4f",$b4);
+#print "$b3\t$b4\t";
+
+
+my @line9;
+my @mark9=(241,3037,8782,14408,17747,17858,18060,23403,28144);
+foreach my $key (@mark9){
+	push (@line9,$hash{$key});
+}
+my @c1=split //,$line9[0];
+my @c2=split //,$line9[1];
+my @c3=split //,$line9[2];
+my @c4=split //,$line9[3];
+my @c5=split //,$line9[4];
+my @c6=split //,$line9[5];
+my @c7=split //,$line9[6];
+my @c8=split //,$line9[7];
+my @c9=split //,$line9[8];
+my $c1=0; my $c2=0; my $c3=0; my $c4=0;my $c9=0;
+foreach my $i (0..$count-1){
+	my $code=$c1[$i].$c2[$i].$c3[$i].$c4[$i].$c5[$i].$c6[$i].$c7[$i].$c8[$i].$c9[$i];
+	$c1++ if $code=~/TTCTCACGT/;
+	$c2++ if $code=~/CCCCCACAT/;
+	$c3++ if $code=~/CCTCTGTAC/;
+	$c4++ if $code=~/CCTCCACAC/;
+	$c9++ if $code=~/TTCCCACGT/;
+}
+my $c5=$c1/$count;$c5=sprintf("%.4f",$c5);
+my $c6=$c2/$count;$c6=sprintf("%.4f",$c6);
+my $c7=$c3/$count;$c7=sprintf("%.4f",$c7);
+my $c8=$c4/$count;$c8=sprintf("%.4f",$c8);
+my $c10=$c9/$count;$c10=sprintf("%.4f",$c10);
+#print "$c5\t$c6\t$c7\t$c8\n";
+
+#print "Country\tCCCA\tTTTG\tCAC\tTGT\tTTCTCACGT\tCCCCCACAT\tCCTCTGTAC\tCCTCCACAC\n";
+print "$country\t$b3\t$b4\t$a3\t$a4\t$c5\t$c6\t$c7\t$c8\t$c10\n";
